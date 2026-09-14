@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Interactive City of Atlanta building footprint map using official public GIS layers." />
+  <title>Map Jinn 17.4 — Clean Streets + Apparel Labels</title>
+  <link rel="preconnect" href="https://js.arcgis.com" />
+  <link rel="stylesheet" href="https://js.arcgis.com/4.33/esri/themes/dark/main.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">MJ</div>
+        <div>
+          <strong>Map Jinn</strong>
+          <span>U.S. Building Footprints · Clean Streets · Apparel Labels</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="atlantaBtn" class="chip chip-primary" type="button">Atlanta full city</button>
+        <button id="themeBtn" class="chip" type="button">Paper mode</button>
+        <button id="focusBtn" class="chip" type="button">Focus map</button>
+        <button id="logoutBtn" class="chip" type="button">Logout</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside id="sidebar" class="sidebar">
+        <section class="hero-card">
+          <div class="eyebrow"><span class="status-dot"></span> ACTUAL ATLANTA GIS</div>
+          <h1>Atlanta,<br><em>building by building.</em></h1>
+          <p>This opens on the real City of Atlanta footprint layer. No starter demo location and no OSMnx build step.</p>
+        </section>
+
+        <section class="panel search-panel">
+          <div class="panel-head">
+            <div>
+              <span class="kicker">FIND AREA</span>
+              <h2>ZIP or neighborhood</h2>
+            </div>
+            <span id="searchModeBadge" class="badge">AUTO</span>
+          </div>
+          <div class="search-row">
+            <input id="areaInput" list="neighborhoodList" autocomplete="off" spellcheck="false" placeholder="30331, Chicago, or an address" />
+            <button id="goBtn" class="go-btn" type="button">Go</button>
+          </div>
+          <datalist id="neighborhoodList"></datalist>
+          <div class="segmented" role="group" aria-label="Area type">
+            <button class="mode-btn active" data-mode="auto" type="button">Auto</button>
+            <button class="mode-btn" data-mode="zip" type="button">ZIP</button>
+            <button class="mode-btn" data-mode="neighborhood" type="button">Neighborhood</button>
+          </div>
+          <div id="searchMessage" class="status-line"><span class="status-dot"></span> City of Atlanta is already loaded.</div>
+        </section>
+
+        <section class="panel footprint-areas-panel">
+          <div class="panel-head">
+            <div>
+              <span class="kicker">SELECTED FOOTPRINT PLACES</span>
+              <h2>Footprint places</h2>
+            </div>
+            <span id="footprintAreaCount" class="badge">1</span>
+          </div>
+          <p class="panel-copy">Search any U.S. place to save it here. Tap a saved place to jump back to its footprint design. Streets appear only at close print-detail scales; wide views stay footprint-only.</p>
+          <div id="footprintAreaList" class="footprint-area-list" aria-live="polite"></div>
+          <button id="clearFootprintAreasBtn" class="area-clear-btn" type="button">Clear selected places</button>
+        </section>
+
+        <section class="metrics-grid">
+          <article class="metric"><span>AREA</span><strong id="areaName">City of Atlanta</strong><small id="areaType">CITY LIMITS</small></article>
+          <article class="metric"><span>BUILDINGS</span><strong id="buildingCount">—</strong><small>FOOTPRINT FEATURES</small></article>
+          <article class="metric"><span>FOOTPRINT AREA</span><strong id="footprintArea">—</strong><small>TOTAL SELECTED</small></article>
+          <article class="metric"><span>VIEW SCALE</span><strong id="mapScale">—</strong><small>LIVE MAP</small></article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="kicker">MAP STYLE</span>
+              <h2>Footprints + clean streets</h2>
+            </div>
+          </div>
+          <label class="control-row"><span><b>Building footprints</b><small>Building polygons for the active saved place</small></span><input id="footprintsToggle" type="checkbox" checked /></label>
+          <label class="control-row"><span><b>Street linework + names</b><small>Clean road context at close footprint scale</small></span><input id="streetsToggle" type="checkbox" checked /></label>
+          <label class="control-row"><span><b>City / area boundary</b><small>Outline selected geography</small></span><input id="boundaryToggle" type="checkbox" checked /></label>
+          <div class="style-grid">
+            <button class="style-btn active" data-style="filled" type="button"><span class="swatch filled"></span>Filled</button>
+            <button class="style-btn" data-style="outline" type="button"><span class="swatch outline"></span>Outline</button>
+            <button class="style-btn" data-style="dense" type="button"><span class="swatch dense"></span>Dense</button>
+          </div>
+          <label class="range-row">Footprint opacity <output id="opacityValue">78%</output><input id="opacityRange" type="range" min="25" max="100" value="78" /></label>
+        </section>
+
+        <section class="panel label-panel">
+          <div class="panel-head">
+            <div>
+              <span class="kicker">APPAREL LABELS</span>
+              <h2>Print-ready map text</h2>
+            </div>
+            <span id="labelBadge" class="badge">ON</span>
+          </div>
+          <p class="panel-copy">Labels are drawn into the map itself, so they appear in PNG exports for shirts and jackets.</p>
+          <label class="control-row"><span><b>Location name</b><small>City, ZIP, neighborhood, or searched place</small></span><input id="locationLabelToggle" type="checkbox" checked /></label>
+          <label class="control-row"><span><b>Coordinates</b><small>Center-point latitude and longitude</small></span><input id="coordsLabelToggle" type="checkbox" /></label>
+          <div class="label-input-block">
+            <label for="customLabelInput">Custom label</label>
+            <input id="customLabelInput" type="text" maxlength="80" placeholder="ATLANTA · 30331" />
+          </div>
+          <div class="label-controls-grid">
+            <label>Position
+              <select id="labelPosition">
+                <option value="bottom" selected>Bottom</option>
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+              </select>
+            </label>
+            <label>Case
+              <select id="labelCase">
+                <option value="upper" selected>UPPERCASE</option>
+                <option value="normal">Normal</option>
+              </select>
+            </label>
+          </div>
+          <label class="range-row">Label size <output id="labelSizeValue">28 px</output><input id="labelSizeRange" type="range" min="14" max="56" value="28" /></label>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="kicker">EXPORT</span>
+              <h2>Take the map with you</h2>
+            </div>
+          </div>
+          <p class="panel-copy">PNG exports instantly. GeoJSON and CSV export footprints inside the selected ZIP/neighborhood (or the current map view).</p>
+          <div class="export-grid">
+            <button id="pngBtn" type="button">PNG</button>
+            <button id="geojsonBtn" type="button">GeoJSON</button>
+            <button id="csvBtn" type="button">CSV</button>
+          </div>
+          <div id="exportMessage" class="status-line muted">Exports use the official footprint layer.</div>
+        </section>
+
+        <section class="source-card">
+          <span class="kicker">DATA SOURCE</span>
+          <strong>City of Atlanta Department of City Planning GIS</strong>
+          <p>Atlanta official GIS + USA Structures building polygons · clean street reference overlay</p>
+          <span class="no-key"><span class="status-dot"></span> Public data · no API key</span>
+        </section>
+      </aside>
+
+      <section class="map-stage">
+        <div id="viewDiv"></div>
+        <div id="mapLoading" class="map-loading">
+          <div class="scan-line"></div>
+          <div class="loader-copy"><span class="loader-pulse"></span><strong>Loading Atlanta footprints</strong><small>Rendering the City's existing GIS service — not rebuilding OSM.</small></div>
+        </div>
+        <div class="map-title">
+          <span>FOOTPRINT MAP</span>
+          <strong id="mapTitle">City of Atlanta, Georgia</strong>
+        </div>
+        <div class="legend">
+          <span><i class="legend-box"></i> Building footprint</span>
+          <span><i class="legend-line"></i> Street linework</span>
+          <span><i class="legend-boundary"></i> Selected area</span>
+        </div>
+        <div id="toast" class="toast" role="status"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://js.arcgis.com/4.33/"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+  <script>
+    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+      try { await fetch('/api/auth/logout', {method: 'POST'}); } catch (_) {}
+      location.href = '/login';
+    });
+  </script>
+</body>
+</html>

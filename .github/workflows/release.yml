@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate server
+        run: python -m py_compile app.py
+      - name: Archive source
+        run: zip -r "map-jinn-${GITHUB_REF_NAME}.zip" . -x '.git/*' 'node_modules/*' 'map_jinn_auth.sqlite3*'
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: map-jinn-${{ github.ref_name }}.zip

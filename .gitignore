@@ -1,0 +1,13 @@
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+map_jinn_auth.sqlite3
+map_jinn_auth.sqlite3-*
+/data/
+test-results/
+playwright-report/
+.playwright/
+*.webm
+*.log

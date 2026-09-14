@@ -1,0 +1,51 @@
+name: Screenshots and Demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'static/**'
+      - 'templates/**'
+      - 'app.py'
+      - 'tests/screenshots.spec.js'
+      - 'scripts/record-demo.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run screenshots
+      - run: npm run demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: map-jinn-media
+          path: |
+            docs/screenshots/*.png
+            demo/map-jinn-demo.mp4
+      - name: Commit generated media to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots/*.png demo/map-jinn-demo.mp4
+          if git diff --cached --quiet; then
+            echo "Media already current."
+          else
+            git commit -m "docs: refresh Playwright screenshots and demo video"
+            git push
+          fi

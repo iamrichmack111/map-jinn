@@ -1,0 +1,6 @@
+* [Home](Home)
+* [Installation](Installation)
+* [Apparel Workflow](Apparel-Workflow)
+* [Architecture](Architecture)
+* [Data Sources](Data-Sources)
+* [Development](Development)

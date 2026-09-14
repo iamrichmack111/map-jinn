@@ -1,0 +1,23 @@
+name: Wiki Source Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki/**'
+  workflow_dispatch:
+
+jobs:
+  validate-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate wiki source
+        run: |
+          test -s wiki/Home.md
+          test -s wiki/Installation.md
+          test -s wiki/Apparel-Workflow.md
+          test -s wiki/Architecture.md
+          test -s wiki/Data-Sources.md
+          test -s wiki/Development.md
+          echo "Wiki source is ready. Publish with ./scripts/push-wiki.sh after enabling GitHub Wiki."

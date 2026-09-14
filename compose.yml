@@ -1,0 +1,16 @@
+services:
+  map-jinn:
+    build: .
+    image: map-jinn:17.4
+    ports:
+      - "5333:5333"
+    environment:
+      MAP_JINN_HOST: 0.0.0.0
+      MAP_JINN_PORT: 5333
+      MAP_JINN_DB_PATH: /data/map_jinn_auth.sqlite3
+    volumes:
+      - map_jinn_data:/data
+    restart: unless-stopped
+
+volumes:
+  map_jinn_data:

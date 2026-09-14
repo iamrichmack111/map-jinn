@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+.venv
+__pycache__
+*.pyc
+map_jinn_auth.sqlite3*
+test-results
+playwright-report
+demo/*.webm
