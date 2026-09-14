@@ -22,3 +22,10 @@
 
 - Clean street linework and selective street labels for apparel-oriented footprint designs.
 - Apparel map labels and nationwide footprint-place workflow.
+
+## 17.4.4
+
+- Added male voice narration to the Playwright demo video.
+- Added Edge TTS narration with an espeak-ng fallback.
+- Added ffprobe checks so CI fails if the demo MP4 has no audio track.
+- Release artifact continues to use `demo/map-jinn-demo.mp4`, now with AAC audio.

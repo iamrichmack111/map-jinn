@@ -80,24 +80,24 @@ try {
   await page.locator('#submitBtn').click();
   await page.waitForURL(url => url.pathname === '/');
   await page.locator('#mapTitle').waitFor({ state: 'visible' });
-  await sleep(2500);
+  await sleep(3500);
 
   await page.locator('#customLabelInput').fill('ATLANTA · FOOTPRINT STUDY');
-  await sleep(1500);
+  await sleep(2200);
   await page.locator('#coordsLabelToggle').check();
-  await sleep(1200);
+  await sleep(1800);
 
   // Theme transitions are nice in the demo, but GIS/CDN timing must never
   // make media generation fail. The controls are clicked by stable IDs.
   await page.locator('#themeBtn').click().catch(() => {});
-  await sleep(1400);
+  await sleep(1800);
   await page.locator('#themeBtn').click().catch(() => {});
-  await sleep(1200);
+  await sleep(1700);
 
   await page.locator('#areaInput').fill('30331');
-  await sleep(1200);
+  await sleep(2200);
   await page.locator('#areaInput').fill('');
-  await sleep(700);
+  await sleep(1800);
 
   const video = page.video();
   await page.close();

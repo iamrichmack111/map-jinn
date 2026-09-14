@@ -10,6 +10,9 @@ on:
       - 'app.py'
       - 'tests/**'
       - 'scripts/record-demo.mjs'
+      - 'scripts/add-demo-voice.sh'
+      - 'scripts/synthesize-demo-voice.py'
+      - 'scripts/demo-narration.txt'
       - 'playwright.config.js'
       - 'package.json'
       - '.github/workflows/media.yml'
@@ -37,7 +40,8 @@ jobs:
       - name: Install ffmpeg and Playwright
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg espeak-ng
+          python -m pip install --disable-pip-version-check edge-tts
           npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
 
@@ -56,6 +60,8 @@ jobs:
           test -s docs/screenshots/03-footprint-map.png
           test -s demo/map-jinn-demo.mp4
           test "$(stat -c%s demo/map-jinn-demo.mp4)" -gt 10000
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 demo/map-jinn-demo.mp4 | grep -q .
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 demo/map-jinn-demo.mp4 | grep -q .
           ls -lh docs/screenshots/*.png demo/map-jinn-demo.mp4
 
       - name: Upload screenshots and demo

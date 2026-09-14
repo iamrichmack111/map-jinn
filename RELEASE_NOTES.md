@@ -1,13 +1,11 @@
-# Map Jinn 17.4.3
+# Map Jinn 17.4.4
 
-This release keeps the approved 17.4 footprint/apparel map behavior intact and completes the repository delivery layer.
+This release keeps the approved 17.4 clean-streets footprint map and adds a narrated Playwright demo.
 
-- Playwright smoke tests
-- Playwright screenshots included in the repository and Release
-- Playwright-recorded H.264 demo video
-- Docker build + live health validation
-- GHCR image publishing
-- GitHub Release with ZIP, SHA-256 checksums, screenshots, demo, and architecture SVG
-- GitHub issue forms, labels, and starter issues
-- D2 architecture source with custom Map Jinn icon set
-- README CI/CD badges and architecture diagram
+- Playwright screenshots
+- Playwright-recorded MP4 demo with male voice narration
+- Audio-stream verification with ffprobe
+- Docker/GHCR workflow
+- CI/CD and container health checks
+- D2 architecture and custom icons
+- GitHub issues, wiki, topics, and release assets

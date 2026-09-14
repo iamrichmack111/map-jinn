@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-TAG="${1:-v17.4.3}"
+TAG="${1:-v17.4.4}"
 need(){ command -v "$1" >/dev/null 2>&1 || { echo "ERROR: $1 is required" >&2; exit 1; }; }
 need git
 need gh
@@ -83,6 +83,9 @@ test -s docs/screenshots/01-login.png
 test -s docs/screenshots/02-workspace.png
 test -s docs/screenshots/03-footprint-map.png
 test -s demo/map-jinn-demo.mp4
+if command -v ffprobe >/dev/null 2>&1; then
+  ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 demo/map-jinn-demo.mp4 | grep -q .
+fi
 test -s docs/architecture.d2
 test -s docs/architecture.svg
 
