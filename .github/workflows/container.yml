@@ -3,17 +3,47 @@ name: Container
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/screenshots/**'
+      - 'demo/**'
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  docker-build:
+  docker-build-and-health:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+
       - name: Build image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: false
+          load: true
           tags: map-jinn:ci
+
+      - name: Validate Compose
+        run: docker compose config >/dev/null
+
+      - name: Boot container and check health
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --rm --name map-jinn-ci -p 5333:5333 map-jinn:ci
+          cleanup() { docker logs map-jinn-ci || true; docker stop map-jinn-ci >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          ok=0
+          for i in $(seq 1 30); do
+            if python3 -c "import json,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:5333/api/health',timeout=2)); raise SystemExit(0 if d.get('ok') is True else 1)" 2>/dev/null; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ok" = 1

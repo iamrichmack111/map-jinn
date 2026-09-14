@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to publish or refresh
+        required: true
+        default: v17.4.2
 
 permissions:
   contents: write
@@ -11,16 +17,74 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
+      - name: Resolve release tag
+        id: rel
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            TAG='${{ inputs.tag }}'
+          fi
+          test -n "$TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-      - name: Validate server
-        run: python -m py_compile app.py
-      - name: Archive source
-        run: zip -r "map-jinn-${GITHUB_REF_NAME}.zip" . -x '.git/*' 'node_modules/*' 'map_jinn_auth.sqlite3*'
-      - uses: softprops/action-gh-release@v2
-        with:
-          body_path: RELEASE_NOTES.md
-          files: map-jinn-${{ github.ref_name }}.zip
+          fetch-depth: 0
+          ref: ${{ steps.rel.outputs.tag }}
+
+      - name: Verify release media
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/screenshots/01-login.png
+          test -s docs/screenshots/02-workspace.png
+          test -s docs/screenshots/03-footprint-map.png
+          test -s demo/map-jinn-demo.mp4
+          python3 -m py_compile app.py
+
+      - name: Build source archive and checksums
+        id: assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='${{ steps.rel.outputs.tag }}'
+          ZIP="map-jinn-${TAG}.zip"
+          git archive --format=zip --output="$ZIP" HEAD
+          sha256sum \
+            "$ZIP" \
+            docs/screenshots/01-login.png \
+            docs/screenshots/02-workspace.png \
+            docs/screenshots/03-footprint-map.png \
+            demo/map-jinn-demo.mp4 > SHA256SUMS.txt
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create or refresh GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='${{ steps.rel.outputs.tag }}'
+          ZIP='${{ steps.assets.outputs.zip }}'
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "Map Jinn ${TAG#v}" \
+              --notes-file RELEASE_NOTES.md
+          else
+            gh release create "$TAG" \
+              --title "Map Jinn ${TAG#v}" \
+              --notes-file RELEASE_NOTES.md
+          fi
+
+          gh release upload "$TAG" --clobber \
+            "$ZIP" \
+            SHA256SUMS.txt \
+            docs/screenshots/01-login.png \
+            docs/screenshots/02-workspace.png \
+            docs/screenshots/03-footprint-map.png \
+            demo/map-jinn-demo.mp4

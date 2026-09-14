@@ -1,9 +1,16 @@
 # Changelog
 
+## 17.4.2
+
+- Repaired CI and Playwright selectors.
+- Made demo recording independent of fixed port 5333.
+- Added resilient MP4 conversion and media verification.
+- Added live Docker health validation.
+- Made GitHub Release publishing idempotent.
+- Added one-command shipping script that waits for CI, Container, Media, and Release jobs and prints failed logs automatically.
+- Preserved the approved 17.4 map behavior.
+
 ## 17.4.0
 
-- Preserved the 17.2 apparel-label workflow.
-- Added restrained street linework and selective road names at close scales.
-- Removed extra place/context-label clutter introduced during the 17.3 experiment.
-- Wide views remain footprint-first rather than turning into a conventional basemap.
-- Added GitHub-ready Docker, CI, Playwright, screenshots, demo-video, release, and wiki tooling.
+- Clean street linework and selective street labels for apparel-oriented footprint designs.
+- Apparel map labels and nationwide footprint-place workflow.

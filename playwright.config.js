@@ -13,6 +13,8 @@ function systemChromium() {
 }
 
 const executablePath = systemChromium();
+const launchOptions = { args: ['--no-sandbox'] };
+if (executablePath) launchOptions.executablePath = executablePath;
 
 module.exports = defineConfig({
   testDir: './tests',
@@ -28,12 +30,12 @@ module.exports = defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    launchOptions: executablePath ? { executablePath, args: ['--no-sandbox'] } : { args: ['--no-sandbox'] }
+    launchOptions
   },
   webServer: {
-    command: 'MAP_JINN_PORT=5333 MAP_JINN_DB_PATH=/tmp/map-jinn-playwright.sqlite3 python3 app.py',
+    command: "bash -c 'rm -f /tmp/map-jinn-playwright.sqlite3 /tmp/map-jinn-playwright.sqlite3-wal /tmp/map-jinn-playwright.sqlite3-shm; MAP_JINN_PORT=5333 MAP_JINN_DB_PATH=/tmp/map-jinn-playwright.sqlite3 python3 app.py'",
     url: 'http://127.0.0.1:5333/api/health',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 30_000
   }
 });

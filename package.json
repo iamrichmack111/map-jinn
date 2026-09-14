@@ -1,6 +1,6 @@
 {
   "name": "map-jinn",
-  "version": "17.4.0",
+  "version": "17.4.2",
   "private": true,
   "description": "Building-footprint map and print-art workspace with clean street context and apparel labels.",
   "scripts": {

@@ -88,3 +88,18 @@ Tagging a version such as `v17.4.0` triggers the release workflow:
 git tag -a v17.4.0 -m "Map Jinn 17.4"
 git push origin v17.4.0
 ```
+
+## GitHub CI/CD and media
+
+The repository includes four independent checks:
+
+- **CI** — Python/JavaScript syntax plus Playwright smoke tests.
+- **Container** — Docker build, Compose validation, and a live health check.
+- **Screenshots and Demo** — Playwright screenshots and an H.264 MP4 demo uploaded as an Actions artifact.
+- **Release** — tag-driven GitHub Release with source ZIP, SHA-256 checksums, screenshots, and demo video.
+
+To ship the repaired release from an authenticated clone:
+
+```bash
+./scripts/ship-release.sh
+```
