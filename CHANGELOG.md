@@ -1,5 +1,13 @@
 # Changelog
 
+## 17.4.3
+
+- Added D2 architecture source and custom SVG icon set.
+- Added issue forms plus idempotent starter issue/label bootstrap.
+- Added GHCR Docker publishing workflow.
+- Hardened Playwright screenshot/demo shipping and GitHub Release packaging.
+- Added README workflow badges, screenshots, demo, and architecture documentation.
+
 ## 17.4.2
 
 - Repaired CI and Playwright selectors.

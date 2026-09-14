@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible Map Jinn problem.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the location/search used and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      placeholder: "1. Search ...\n2. Zoom ...\n3. Export ..."
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / OS
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console or terminal output
+      render: shell

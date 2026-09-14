@@ -1,17 +1,13 @@
-# Map Jinn 17.4.2
+# Map Jinn 17.4.3
 
-This release keeps the approved 17.4 footprint-map experience unchanged and repairs the GitHub delivery pipeline.
+This release keeps the approved 17.4 footprint/apparel map behavior intact and completes the repository delivery layer.
 
-## Release engineering fixes
-
-- Reliable Playwright smoke-test workflow.
-- Playwright-generated login, workspace, and footprint-map screenshots.
-- Playwright-recorded demo converted to H.264 MP4 with ffmpeg.
-- Docker image build plus live `/api/health` container test.
-- Media is uploaded as a GitHub Actions artifact and committed to the repository when permitted.
-- Release creation is idempotent: reruns refresh an existing GitHub Release instead of failing because the release already exists.
-- Release assets include source ZIP, checksums, three screenshots, and the MP4 demo.
-
-## Map behavior
-
-No map-design changes are included in this release. It retains the approved clean-street footprint map, apparel labels, login, nationwide place search, saved footprint places, and export controls.
+- Playwright smoke tests
+- Playwright screenshots included in the repository and Release
+- Playwright-recorded H.264 demo video
+- Docker build + live health validation
+- GHCR image publishing
+- GitHub Release with ZIP, SHA-256 checksums, screenshots, demo, and architecture SVG
+- GitHub issue forms, labels, and starter issues
+- D2 architecture source with custom Map Jinn icon set
+- README CI/CD badges and architecture diagram

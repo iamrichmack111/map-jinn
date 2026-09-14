@@ -1,6 +1,6 @@
 {
   "name": "map-jinn",
-  "version": "17.4.2",
+  "version": "17.4.3",
   "private": true,
   "description": "Building-footprint map and print-art workspace with clean street context and apparel labels.",
   "scripts": {
@@ -8,7 +8,9 @@
     "test:headed": "playwright test --headed",
     "screenshots": "playwright test --grep @media",
     "demo": "node scripts/record-demo.mjs",
-    "assets": "bash scripts/build-release-assets.sh"
+    "assets": "bash scripts/build-release-assets.sh",
+    "ship": "bash scripts/ship-everything.sh",
+    "issues": "bash scripts/bootstrap-issues.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"

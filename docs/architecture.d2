@@ -1,0 +1,84 @@
+direction: right
+
+client: "Map Jinn Browser" {
+  icon: ./icons/browser.svg
+  shape: rectangle
+  style.fill: "#0f172a"
+  style.stroke: "#60a5fa"
+  style.font-color: "#f8fafc"
+}
+
+app: "Python App + Auth" {
+  icon: ./icons/python.svg
+  shape: rectangle
+  style.fill: "#111827"
+  style.stroke: "#facc15"
+  style.font-color: "#f8fafc"
+}
+
+gis: "Footprints + Streets" {
+  icon: ./icons/arcgis.svg
+  shape: rectangle
+  style.fill: "#052e2b"
+  style.stroke: "#34d399"
+  style.font-color: "#f8fafc"
+}
+
+prints: "Apparel Export" {
+  icon: ./icons/footprints.svg
+  shape: rectangle
+  style.fill: "#111827"
+  style.stroke: "#f8fafc"
+  style.font-color: "#f8fafc"
+}
+
+playwright: "Playwright\nScreenshots + Demo" {
+  icon: ./icons/playwright.svg
+  shape: rectangle
+  style.fill: "#111827"
+  style.stroke: "#22c55e"
+  style.font-color: "#f8fafc"
+}
+
+docker: "Docker Image" {
+  icon: ./icons/docker.svg
+  shape: rectangle
+  style.fill: "#082f49"
+  style.stroke: "#38bdf8"
+  style.font-color: "#f8fafc"
+}
+
+actions: "GitHub Actions\nCI/CD" {
+  icon: ./icons/github-actions.svg
+  shape: rectangle
+  style.fill: "#1e1b4b"
+  style.stroke: "#a78bfa"
+  style.font-color: "#f8fafc"
+}
+
+ghcr: "GHCR Container" {
+  icon: ./icons/ghcr.svg
+  shape: rectangle
+  style.fill: "#111827"
+  style.stroke: "#94a3b8"
+  style.font-color: "#f8fafc"
+}
+
+release: "GitHub Release\nZIP + SHA256 + PNG + MP4" {
+  icon: ./icons/github-actions.svg
+  shape: rectangle
+  style.fill: "#111827"
+  style.stroke: "#f59e0b"
+  style.font-color: "#f8fafc"
+}
+
+client -> app: login + local workspace
+client -> gis: query visible map area
+app -> client: HTML + JS + session
+client -> prints: PNG / GeoJSON / CSV
+app -> playwright: deterministic test server
+actions -> playwright: test + capture
+actions -> docker: build + health check
+docker -> ghcr: publish main + tags
+actions -> release: verified release assets
+playwright -> release: screenshots + MP4

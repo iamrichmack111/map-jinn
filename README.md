@@ -1,105 +1,91 @@
 # Map Jinn 17.4
 
-![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![Playwright](https://img.shields.io/badge/Playwright-tested-2EAD33?logo=playwright&logoColor=white)
-![GIS](https://img.shields.io/badge/GIS-building%20footprints-7FBF3F)
+[![CI](https://github.com/iamrichmack111/map-jinn/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/ci.yml)
+[![Container](https://github.com/iamrichmack111/map-jinn/actions/workflows/container.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/container.yml)
+[![Playwright Media](https://github.com/iamrichmack111/map-jinn/actions/workflows/media.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/media.yml)
+[![Docker Publish](https://github.com/iamrichmack111/map-jinn/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/docker-publish.yml)
+[![Release](https://github.com/iamrichmack111/map-jinn/actions/workflows/release.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/release.yml)
 
-**Map Jinn** is a building-footprint-first map workspace for geographic artwork and apparel design. Version 17.4 keeps the clean 17.2 apparel look while adding restrained street linework and selective road names at close print-detail scales.
+**Map Jinn** is a footprint-first U.S. mapping workspace for geographic artwork and apparel design. Buildings remain the visual focus; restrained streets and selective road names provide enough context for jacket and shirt graphics without turning the design into a conventional navigation map.
 
-The core rule is simple: **the footprints are the map**. There is no conventional basemap underneath the artwork.
+## Architecture
 
-## Highlights
+The architecture is authored in **D2** at [`docs/architecture.d2`](docs/architecture.d2). The diagram uses Map Jinn's custom SVG icon set from [`docs/icons/`](docs/icons/).
 
-- Building-footprint-first map design
-- Nationwide U.S. footprint search with bounded viewport loading
-- Atlanta official GIS layers on startup
-- Clean street linework + selective road names at close scale
+![Map Jinn D2 architecture](docs/architecture.svg)
+
+## What ships
+
+- U.S. building-footprint mapping with bounded viewport loading
+- Atlanta official GIS footprint layers
+- Clean street linework and selective street names
 - Saved footprint places
-- Apparel labels: location, coordinates, and custom text
-- Dark and paper modes
-- Filled, outline, and dense footprint styles
-- PNG, GeoJSON, and CSV export
-- Local login with SQLite + PBKDF2 password hashing
-- Docker + Docker Compose
+- Apparel labels and print-ready PNG export
+- Local login with hashed passwords and SQLite persistence
 - Playwright smoke tests
-- Automated screenshots and MP4 demo generation
-- GitHub Actions CI, container build, media, and release workflows
-- Wiki source included in `wiki/`
+- Playwright-generated screenshots
+- Playwright-recorded demo converted to H.264 MP4
+- Docker + Compose health-checked container
+- GHCR container publishing on `main` and version tags
+- GitHub Actions CI/CD
+- GitHub Release ZIP, checksums, screenshots, architecture SVG, and demo video
+- Issue templates plus bootstrap project issues/labels
+- D2 architecture source with custom icons
 
-## Run locally
+## Playwright screenshots
+
+| Login | Workspace | Footprint artwork |
+| --- | --- | --- |
+| ![Login](docs/screenshots/01-login.png) | ![Workspace](docs/screenshots/02-workspace.png) | ![Footprint map](docs/screenshots/03-footprint-map.png) |
+
+## Playwright demo
+
+[`demo/map-jinn-demo.mp4`](demo/map-jinn-demo.mp4)
+
+The demo is recorded by Playwright in Chromium and converted to an H.264 MP4 with FFmpeg.
+
+## Local run
 
 ```bash
 chmod +x run.sh
 ./run.sh
 ```
 
-Open the URL printed by the launcher. On first use, create a local account.
-
 ## Docker
 
 ```bash
 docker compose up --build -d
+curl http://127.0.0.1:5333/api/health
 ```
 
-Open `http://127.0.0.1:5333`.
+Published images are built by GitHub Actions at:
 
-## Browser tests
+```text
+ghcr.io/iamrichmack111/map-jinn:latest
+```
+
+## Tests and media
 
 ```bash
-./scripts/setup-dev.sh
+npm install
+npx playwright install --with-deps chromium
 npm test
-```
-
-## Screenshots + demo
-
-```bash
 npm run screenshots
 npm run demo
 ```
 
-Screenshots are written to `docs/screenshots/`. The MP4 demo is written to `demo/map-jinn-demo.mp4`.
+## Issues
 
-## Data sources
-
-Atlanta-specific layers use the City of Atlanta Department of City Planning public GIS services. Nationwide building rendering uses the USA Structures public polygon service. Search uses public ArcGIS geocoding/place services.
-
-## Repository topics
-
-After the repository is pushed:
+The repository includes bug/feature issue forms and an idempotent bootstrap script that creates labels and starter issues for apparel presets, GIS coverage, visual regression, container releases, and D2 maintenance.
 
 ```bash
-./scripts/publish-topics.sh
+./scripts/bootstrap-issues.sh
 ```
 
-## Wiki
-
-The canonical wiki source is in `wiki/`. After enabling GitHub Wiki and creating its first page once:
+## Release pipeline
 
 ```bash
-./scripts/push-wiki.sh
+./scripts/ship-everything.sh
 ```
 
-## Release
-
-Tagging a version such as `v17.4.0` triggers the release workflow:
-
-```bash
-git tag -a v17.4.0 -m "Map Jinn 17.4"
-git push origin v17.4.0
-```
-
-## GitHub CI/CD and media
-
-The repository includes four independent checks:
-
-- **CI** — Python/JavaScript syntax plus Playwright smoke tests.
-- **Container** — Docker build, Compose validation, and a live health check.
-- **Screenshots and Demo** — Playwright screenshots and an H.264 MP4 demo uploaded as an Actions artifact.
-- **Release** — tag-driven GitHub Release with source ZIP, SHA-256 checksums, screenshots, and demo video.
-
-To ship the repaired release from an authenticated clone:
-
-```bash
-./scripts/ship-release.sh
-```
+That command pushes the repository changes, enables workflows, creates project issues/labels, runs CI, validates the Docker container, captures Playwright screenshots and the demo video, publishes the GHCR image, commits the generated media, tags the release, and waits for the GitHub Release to finish.

@@ -9,7 +9,7 @@ on:
       tag:
         description: Existing tag to publish or refresh
         required: true
-        default: v17.4.2
+        default: v17.4.3
 
 permissions:
   contents: write
@@ -44,6 +44,8 @@ jobs:
           test -s docs/screenshots/02-workspace.png
           test -s docs/screenshots/03-footprint-map.png
           test -s demo/map-jinn-demo.mp4
+          test -s docs/architecture.svg
+          test -s docs/architecture.d2
           python3 -m py_compile app.py
 
       - name: Build source archive and checksums
@@ -59,7 +61,8 @@ jobs:
             docs/screenshots/01-login.png \
             docs/screenshots/02-workspace.png \
             docs/screenshots/03-footprint-map.png \
-            demo/map-jinn-demo.mp4 > SHA256SUMS.txt
+            demo/map-jinn-demo.mp4 \
+            docs/architecture.svg > SHA256SUMS.txt
           echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
 
       - name: Create or refresh GitHub Release
@@ -87,4 +90,5 @@ jobs:
             docs/screenshots/01-login.png \
             docs/screenshots/02-workspace.png \
             docs/screenshots/03-footprint-map.png \
-            demo/map-jinn-demo.mp4
+            demo/map-jinn-demo.mp4 \
+            docs/architecture.svg

@@ -35,6 +35,12 @@ jobs:
           node --check static/js/app.js
           node --check scripts/record-demo.mjs
 
+      - name: Validate D2 architecture + custom icons
+        run: |
+          test -s docs/architecture.d2
+          test -s docs/architecture.svg
+          for f in docs/icons/browser.svg docs/icons/python.svg docs/icons/arcgis.svg docs/icons/footprints.svg docs/icons/playwright.svg docs/icons/docker.svg docs/icons/github-actions.svg docs/icons/ghcr.svg; do test -s "$f"; done
+
       - name: Install test dependencies
         run: npm install --no-audit --no-fund
 
