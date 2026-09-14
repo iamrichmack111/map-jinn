@@ -1,5 +1,12 @@
 # Map Jinn 17.4
 
+## 🎬 Demo
+
+[![Map Jinn narrated demo](demo/map-jinn-demo-preview.gif)](demo/map-jinn-demo.mp4)
+
+**Click the preview to watch the full narrated Playwright demo.**
+
+
 [![CI](https://github.com/iamrichmack111/map-jinn/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/ci.yml)
 [![Container](https://github.com/iamrichmack111/map-jinn/actions/workflows/container.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/container.yml)
 [![Playwright Media](https://github.com/iamrichmack111/map-jinn/actions/workflows/media.yml/badge.svg)](https://github.com/iamrichmack111/map-jinn/actions/workflows/media.yml)
