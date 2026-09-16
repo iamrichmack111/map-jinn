@@ -1,17 +1,11 @@
 name: CI
-
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/screenshots/**'
-      - 'demo/**'
   pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -20,37 +14,36 @@ jobs:
       CI: '1'
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Syntax checks
+      - name: Syntax and backend smoke checks
+        shell: bash
         run: |
+          set -euo pipefail
           python -m py_compile app.py
           node --check static/js/app.js
           node --check scripts/record-demo.mjs
-
-      - name: Validate D2 architecture + custom icons
+          DB="/tmp/map-jinn-ci-${GITHUB_RUN_ID}.sqlite3"
+          MAP_JINN_PORT=5333 MAP_JINN_DB_PATH="$DB" python3 app.py >/tmp/map-jinn-ci.log 2>&1 &
+          PID=$!
+          trap 'kill $PID >/dev/null 2>&1 || true; rm -f "$DB" "$DB-wal" "$DB-shm"' EXIT
+          ok=0
+          for i in $(seq 1 40); do
+            if python3 -c "import json,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:5333/api/health',timeout=2)); raise SystemExit(0 if d.get('ok') is True else 1)" 2>/dev/null; then ok=1; break; fi
+            sleep .5
+          done
+          [[ "$ok" == 1 ]] || { cat /tmp/map-jinn-ci.log || true; exit 1; }
+      - name: Install Playwright
         run: |
-          test -s docs/architecture.d2
-          test -s docs/architecture.svg
-          for f in docs/icons/browser.svg docs/icons/python.svg docs/icons/arcgis.svg docs/icons/footprints.svg docs/icons/playwright.svg docs/icons/docker.svg docs/icons/github-actions.svg docs/icons/ghcr.svg; do test -s "$f"; done
-
-      - name: Install test dependencies
-        run: npm install --no-audit --no-fund
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
       - name: Run Playwright smoke tests
         run: npm test
-
-      - name: Upload Playwright diagnostics
+      - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:

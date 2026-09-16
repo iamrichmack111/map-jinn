@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:07,500
+Map Jinn turns real building footprints into printable map artwork.
+
+2
+00:00:07,500 --> 00:00:15,500
+The demo starts with the built-in account flow, then loads the live GIS workspace.
+
+3
+00:00:15,500 --> 00:00:25,500
+Search ZIP 30331 and Map Jinn actually moves into that footprint area instead of merely typing the query.
+
+4
+00:00:25,500 --> 00:00:35,000
+Switch footprint styles, add an apparel label and live coordinates, and preview dark or paper mode.
+
+5
+00:00:35,000 --> 00:00:42,500
+Focus mode gives the map more room on screen.
+
+6
+00:00:42,500 --> 00:00:52,000
+When the design is ready, export a print-ready PNG directly from the rendered map.

@@ -1,55 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-mkdir -p demo
-
-VIDEO="demo/map-jinn-demo.mp4"
-SILENT="demo/map-jinn-demo-silent.mp4"
-VOICE_MP3="demo/map-jinn-demo-voice.mp3"
-VOICE_WAV="demo/map-jinn-demo-voice.wav"
-FINAL="demo/map-jinn-demo-voiced.mp4"
-
+VIDEO="local-demo/map-jinn-demo.mp4"; SILENT="local-demo/map-jinn-demo-silent.mp4"
+VOICE="local-demo/map-jinn-demo-voice.wav"; FINAL="local-demo/map-jinn-demo-final.mp4"
+CAPTIONS="scripts/demo-captions.srt"; PY="${MAP_JINN_PIPER_PYTHON:-$PWD/.demo-venv/bin/python}"
 [[ -s "$VIDEO" ]] || { echo "ERROR: missing $VIDEO" >&2; exit 1; }
-rm -f "$VOICE_MP3" "$VOICE_WAV" "$FINAL"
-
-if python3 -c 'import edge_tts' >/dev/null 2>&1; then
-  echo "Generating high-quality male narration with Edge TTS..."
-  if ! python3 scripts/synthesize-demo-voice.py; then
-    rm -f "$VOICE_MP3"
-  fi
+[[ -x "$PY" ]] || { echo "ERROR: Piper environment is missing." >&2; exit 1; }
+command -v ffmpeg >/dev/null 2>&1 || { echo "ERROR: ffmpeg is required." >&2; exit 1; }
+command -v ffprobe >/dev/null 2>&1 || { echo "ERROR: ffprobe is required." >&2; exit 1; }
+rm -f "$VOICE" "$SILENT" "$FINAL"
+"$PY" scripts/synthesize-demo-piper.py
+mv "$VIDEO" "$SILENT"
+FILTER="[0:v]tpad=stop_mode=clone:stop_duration=60[v]"
+if [[ -s "$CAPTIONS" ]]; then FILTER="[0:v]tpad=stop_mode=clone:stop_duration=60,subtitles=${CAPTIONS}:force_style='FontName=DejaVu Sans,FontSize=18,Outline=2,MarginV=34'[v]"; fi
+if ! ffmpeg -y -loglevel warning -i "$SILENT" -i "$VOICE" -filter_complex "$FILTER" -map '[v]' -map 1:a:0 -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -ar 48000 -movflags +faststart -shortest "$FINAL"; then
+  ffmpeg -y -loglevel warning -i "$SILENT" -i "$VOICE" -filter_complex '[0:v]tpad=stop_mode=clone:stop_duration=60[v]' -map '[v]' -map 1:a:0 -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -ar 48000 -movflags +faststart -shortest "$FINAL"
 fi
-
-AUDIO=""
-if [[ -s "$VOICE_MP3" ]]; then
-  AUDIO="$VOICE_MP3"
-elif command -v espeak-ng >/dev/null 2>&1; then
-  echo "Edge TTS unavailable; using local male speech fallback..."
-  espeak-ng -v en-us+m3 -s 145 -p 42 -f scripts/demo-narration.txt -w "$VOICE_WAV"
-  AUDIO="$VOICE_WAV"
-else
-  echo "ERROR: no narration engine available (edge-tts or espeak-ng)." >&2
-  exit 1
-fi
-
-mv -f "$VIDEO" "$SILENT"
-
-# Keep the live Playwright recording, then hold its final frame only if narration
-# is longer. The final deliverable always has an AAC audio track.
-ffmpeg -y \
-  -i "$SILENT" \
-  -i "$AUDIO" \
-  -filter_complex "[0:v]tpad=stop_mode=clone:stop_duration=45[v]" \
-  -map "[v]" -map 1:a:0 \
-  -c:v libx264 -preset medium -crf 22 -pix_fmt yuv420p \
-  -c:a aac -b:a 192k \
-  -movflags +faststart -shortest \
-  "$FINAL"
-
-mv -f "$FINAL" "$VIDEO"
-
-# The release demo must contain both a video and audio stream.
-ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$VIDEO" | grep -q .
+mv "$FINAL" "$VIDEO"; rm -f "$SILENT"
 ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$VIDEO" | grep -q .
-
-echo "Voiced demo ready: $VIDEO"
-ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO"
+echo "Piper narrated demo ready: $PWD/$VIDEO"

@@ -11,3 +11,15 @@ playwright-report/
 .playwright/
 *.webm
 *.log
+
+.demo-venv/
+
+/.demo-venv/
+/.demo-voices/
+/local-demo/*.mp4
+/local-demo/*.wav
+/local-demo/*.jpg
+/local-demo/*.jpeg
+/local-demo/*.png
+/local-demo/*.gif
+/local-demo/*.webm

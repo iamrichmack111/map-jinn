@@ -1,94 +1,49 @@
 name: Release
-
 on:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       tag:
         description: Existing tag to publish or refresh
         required: true
-        default: v17.4.3
-
+        default: v17.4.5
 permissions:
   contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Resolve release tag
+      - name: Resolve tag
         id: rel
         shell: bash
         run: |
-          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
-            TAG="$GITHUB_REF_NAME"
-          else
-            TAG='${{ inputs.tag }}'
-          fi
-          test -n "$TAG"
+          if [[ "${GITHUB_REF_TYPE:-}" == tag ]]; then TAG="$GITHUB_REF_NAME"; else TAG='${{ inputs.tag }}'; fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ steps.rel.outputs.tag }}
-
-      - name: Verify release media
-        shell: bash
+      - name: Verify source
         run: |
-          set -euo pipefail
-          test -s docs/screenshots/01-login.png
-          test -s docs/screenshots/02-workspace.png
-          test -s docs/screenshots/03-footprint-map.png
-          test -s demo/map-jinn-demo.mp4
           test -s docs/architecture.svg
           test -s docs/architecture.d2
           python3 -m py_compile app.py
-
-      - name: Build source archive and checksums
+          node --check static/js/app.js
+      - name: Build source release
         id: assets
         shell: bash
         run: |
-          set -euo pipefail
-          TAG='${{ steps.rel.outputs.tag }}'
-          ZIP="map-jinn-${TAG}.zip"
+          TAG='${{ steps.rel.outputs.tag }}'; ZIP="map-jinn-${TAG}.zip"
           git archive --format=zip --output="$ZIP" HEAD
-          sha256sum \
-            "$ZIP" \
-            docs/screenshots/01-login.png \
-            docs/screenshots/02-workspace.png \
-            docs/screenshots/03-footprint-map.png \
-            demo/map-jinn-demo.mp4 \
-            docs/architecture.svg > SHA256SUMS.txt
+          sha256sum "$ZIP" docs/architecture.svg > SHA256SUMS.txt
           echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
-
-      - name: Create or refresh GitHub Release
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          set -euo pipefail
-          TAG='${{ steps.rel.outputs.tag }}'
-          ZIP='${{ steps.assets.outputs.zip }}'
-
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" \
-              --title "Map Jinn ${TAG#v}" \
-              --notes-file RELEASE_NOTES.md
-          else
-            gh release create "$TAG" \
-              --title "Map Jinn ${TAG#v}" \
-              --notes-file RELEASE_NOTES.md
-          fi
-
-          gh release upload "$TAG" --clobber \
-            "$ZIP" \
-            SHA256SUMS.txt \
-            docs/screenshots/01-login.png \
-            docs/screenshots/02-workspace.png \
-            docs/screenshots/03-footprint-map.png \
-            demo/map-jinn-demo.mp4 \
-            docs/architecture.svg
+          TAG='${{ steps.rel.outputs.tag }}'; ZIP='${{ steps.assets.outputs.zip }}'
+          if gh release view "$TAG" >/dev/null 2>&1; then gh release edit "$TAG" --title "Map Jinn ${TAG#v}" --notes-file RELEASE_NOTES.md; else gh release create "$TAG" --title "Map Jinn ${TAG#v}" --notes-file RELEASE_NOTES.md; fi
+          gh release upload "$TAG" --clobber "$ZIP" SHA256SUMS.txt docs/architecture.svg

@@ -8,3 +8,6 @@ map_jinn_auth.sqlite3*
 test-results
 playwright-report
 demo/*.webm
+local-demo
+.demo-venv
+.demo-voices

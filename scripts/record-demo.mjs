@@ -6,7 +6,7 @@ import os from 'node:os';
 import net from 'node:net';
 
 const root = process.cwd();
-const demoDir = path.join(root, 'demo');
+const demoDir = path.join(root, 'local-demo');
 const tmpVideoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'map-jinn-video-'));
 const dbPath = path.join(os.tmpdir(), `map-jinn-demo-${process.pid}.sqlite3`);
 fs.mkdirSync(demoDir, { recursive: true });
@@ -24,6 +24,15 @@ async function freePort() {
   });
 }
 
+async function run(cmd, args) {
+  const proc = spawn(cmd, args, { cwd: root, stdio: 'inherit' });
+  const code = await new Promise((resolve, reject) => {
+    proc.once('error', reject);
+    proc.once('close', resolve);
+  });
+  if (code !== 0) throw new Error(`${cmd} exited with code ${code}`);
+}
+
 const port = await freePort();
 const baseURL = `http://127.0.0.1:${port}`;
 const server = spawn('python3', ['app.py'], {
@@ -36,7 +45,7 @@ server.stdout.on('data', chunk => process.stdout.write(chunk));
 server.stderr.on('data', chunk => process.stderr.write(chunk));
 
 async function waitForServer() {
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 120; i++) {
     try {
       const r = await fetch(`${baseURL}/api/health`);
       if (r.ok) return;
@@ -58,46 +67,78 @@ try {
     '/usr/bin/google-chrome-stable'
   ].filter(Boolean);
   const executablePath = candidates.find(p => fs.existsSync(p));
-  const launchOptions = { headless: true, args: ['--no-sandbox'] };
+  const launchOptions = { headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] };
   if (executablePath) launchOptions.executablePath = executablePath;
 
   browser = await chromium.launch(launchOptions);
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
-    recordVideo: { dir: tmpVideoDir, size: { width: 1440, height: 1000 } }
+    recordVideo: { dir: tmpVideoDir, size: { width: 1440, height: 1000 } },
+    acceptDownloads: true
   });
 
   const page = await context.newPage();
-  page.setDefaultTimeout(12_000);
+  page.setDefaultTimeout(45_000);
 
+  // 1. Show the real login/signup flow.
   await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded' });
-  await sleep(1000);
-
-  // Use stable IDs so first-run auto-switching cannot create a selector race.
+  await sleep(1600);
   await page.locator('#signupTab').click();
   await page.locator('#username').fill(`demo-${Date.now()}`);
   await page.locator('#password').fill('MapJinnDemo!174');
+  await sleep(800);
   await page.locator('#submitBtn').click();
   await page.waitForURL(url => url.pathname === '/');
+
+  // 2. Wait for the actual GIS workspace to finish its first render.
   await page.locator('#mapTitle').waitFor({ state: 'visible' });
-  await sleep(3500);
+  await page.locator('#mapLoading').waitFor({ state: 'hidden', timeout: 60_000 });
+  await sleep(3200);
 
-  await page.locator('#customLabelInput').fill('ATLANTA · FOOTPRINT STUDY');
-  await sleep(2200);
-  await page.locator('#coordsLabelToggle').check();
-  await sleep(1800);
-
-  // Theme transitions are nice in the demo, but GIS/CDN timing must never
-  // make media generation fail. The controls are clicked by stable IDs.
-  await page.locator('#themeBtn').click().catch(() => {});
-  await sleep(1800);
-  await page.locator('#themeBtn').click().catch(() => {});
-  await sleep(1700);
-
+  // 3. Demonstrate the primary feature for real: search ZIP 30331 and render it.
   await page.locator('#areaInput').fill('30331');
-  await sleep(2200);
-  await page.locator('#areaInput').fill('');
+  await sleep(650);
+  await page.locator('#goBtn').click();
+  await page.waitForFunction(() => {
+    const area = document.querySelector('#areaName')?.textContent || '';
+    const status = document.querySelector('#searchMessage')?.textContent || '';
+    return /30331/.test(area) && /selected|ready/i.test(status);
+  }, null, { timeout: 60_000 });
+  await sleep(4500);
+
+  // 4. Show alternate footprint styling.
+  await page.locator('[data-style="outline"]').click();
   await sleep(1800);
+  await page.locator('[data-style="filled"]').click();
+  await sleep(1500);
+
+  // 5. Add print-ready apparel text and coordinates.
+  await page.locator('#customLabelInput').scrollIntoViewIfNeeded();
+  await page.locator('#customLabelInput').fill('ATLANTA · 30331');
+  await page.locator('#coordsLabelToggle').check();
+  await page.locator('#labelSizeRange').evaluate(el => {
+    el.value = '34';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await sleep(3200);
+
+  // 6. Theme transition and focus mode show the artwork clearly.
+  await page.locator('#themeBtn').click();
+  await sleep(2200);
+  await page.locator('#themeBtn').click();
+  await sleep(1600);
+  await page.locator('#focusBtn').click();
+  await sleep(3600);
+  await page.locator('#focusBtn').click();
+  await sleep(1400);
+
+  // 7. Demonstrate PNG export without leaving a file behind in the repo.
+  await page.locator('#pngBtn').scrollIntoViewIfNeeded();
+  const downloadPromise = page.waitForEvent('download', { timeout: 15_000 }).catch(() => null);
+  await page.locator('#pngBtn').click();
+  await downloadPromise;
+  await page.waitForFunction(() => /PNG exported/i.test(document.querySelector('#exportMessage')?.textContent || ''), null, { timeout: 15_000 }).catch(() => {});
+  await sleep(2600);
 
   const video = page.video();
   await page.close();
@@ -107,18 +148,18 @@ try {
   await video.saveAs(finalWebm);
 
   const mp4 = path.join(demoDir, 'map-jinn-demo.mp4');
-  const ff = spawn('ffmpeg', [
+  await run('ffmpeg', [
     '-y', '-i', finalWebm,
-    '-c:v', 'libx264', '-preset', 'medium', '-crf', '23',
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '22',
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-    mp4
-  ], { stdio: 'inherit' });
-  const code = await new Promise(resolve => ff.on('close', resolve));
-  if (code !== 0) throw new Error(`ffmpeg conversion failed with code ${code}.`);
-  if (!fs.existsSync(mp4) || fs.statSync(mp4).size < 10_000) {
+    '-an', mp4
+  ]);
+
+  if (!fs.existsSync(mp4) || fs.statSync(mp4).size < 100_000) {
     throw new Error('Demo MP4 was not created correctly.');
   }
-  console.log(`Demo written to ${mp4}`);
+  fs.rmSync(finalWebm, { force: true });
+  console.log(`Silent demo written to ${mp4}`);
 } finally {
   if (browser) await browser.close().catch(() => {});
   if (!server.killed) server.kill('SIGTERM');

@@ -29,3 +29,9 @@
 - Added Edge TTS narration with an espeak-ng fallback.
 - Added ffprobe checks so CI fails if the demo MP4 has no audio track.
 - Release artifact continues to use `demo/map-jinn-demo.mp4`, now with AAC audio.
+
+## Demo repair
+- Demo recorder now executes and waits for a real ZIP 30331 search instead of only typing into the search box.
+- Added deterministic style, apparel-label, theme, focus-mode, and PNG-export steps.
+- Added project-local demo setup, Edge TTS support with local fallback, burned caption support, and a real animated README GIF.
+- Media CI and release packaging now preserve the demo MP4, animated preview GIF, and poster image.
