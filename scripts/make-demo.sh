@@ -8,6 +8,7 @@ mkdir -p local-demo
 if ! command -v chromium >/dev/null 2>&1 && ! command -v chromium-browser >/dev/null 2>&1 && ! command -v google-chrome >/dev/null 2>&1 && ! command -v google-chrome-stable >/dev/null 2>&1; then npx playwright install chromium; fi
 ./scripts/setup-piper-demo.sh
 node scripts/record-demo.mjs
+cp -f local-demo/map-jinn-demo.mp4 local-demo/map-jinn-demo-browser.mp4
 ./scripts/add-demo-voice.sh
 ./scripts/build-demo-poster.sh
-printf '\nLOCAL DEMO COMPLETE\nVideo:  %s\nPoster: %s\nVoice:  %s\n' "$PWD/local-demo/map-jinn-demo.mp4" "$PWD/local-demo/map-jinn-demo-poster.jpg" "$PWD/local-demo/map-jinn-demo-voice.wav"
+printf '\nLOCAL DEMO COMPLETE\nVideo:    %s\nPoster:   %s\nVoice:    %s\nCaptions: compact lower-third by default\n' "$PWD/local-demo/map-jinn-demo.mp4" "$PWD/local-demo/map-jinn-demo-poster.jpg" "$PWD/local-demo/map-jinn-demo-voice.wav"

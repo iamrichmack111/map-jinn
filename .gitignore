@@ -23,3 +23,6 @@ playwright-report/
 /local-demo/*.png
 /local-demo/*.gif
 /local-demo/*.webm
+
+/local-demo/*.srt
+/local-demo/*.ass

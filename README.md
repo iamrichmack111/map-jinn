@@ -28,7 +28,7 @@ chmod +x scripts/*.sh
 xdg-open local-demo/map-jinn-demo.mp4
 ```
 
-The one-time setup installs Piper locally and downloads `en_US-hfc_male-medium`. Narration is synthesized sentence-by-sentence, then mastered with EQ, compression, and loudness normalization. Rendered media, the Piper model, and the Piper virtual environment are excluded from Git.
+The one-time setup installs Piper locally and downloads `en_US-hfc_male-medium`. Narration is synthesized sentence-by-sentence, then mastered with EQ, compression, and loudness normalization. The final 1080p demo uses compact synchronized captions by default. Captions are split into short two-line chunks and rendered with a fixed 1920x1080 ASS style, so they cannot expand across the screen. To render without captions, run `MAP_JINN_DEMO_CAPTIONS=0 ./scripts/make-demo.sh`. Rendered media, captions, the Piper model, and the Piper virtual environment are excluded from Git.
 
 To replace only the narration without re-recording the browser demo:
 ```bash

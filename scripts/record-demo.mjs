@@ -72,8 +72,8 @@ try {
 
   browser = await chromium.launch(launchOptions);
   const context = await browser.newContext({
-    viewport: { width: 1440, height: 1000 },
-    recordVideo: { dir: tmpVideoDir, size: { width: 1440, height: 1000 } },
+    viewport: { width: 1920, height: 1080 },
+    recordVideo: { dir: tmpVideoDir, size: { width: 1920, height: 1080 } },
     acceptDownloads: true
   });
 
@@ -82,7 +82,7 @@ try {
 
   // 1. Show the real login/signup flow.
   await page.goto(`${baseURL}/login`, { waitUntil: 'domcontentloaded' });
-  await sleep(1600);
+  await sleep(1100);
   await page.locator('#signupTab').click();
   await page.locator('#username').fill(`demo-${Date.now()}`);
   await page.locator('#password').fill('MapJinnDemo!174');
@@ -93,7 +93,7 @@ try {
   // 2. Wait for the actual GIS workspace to finish its first render.
   await page.locator('#mapTitle').waitFor({ state: 'visible' });
   await page.locator('#mapLoading').waitFor({ state: 'hidden', timeout: 60_000 });
-  await sleep(3200);
+  await sleep(2400);
 
   // 3. Demonstrate the primary feature for real: search ZIP 30331 and render it.
   await page.locator('#areaInput').fill('30331');
@@ -104,7 +104,7 @@ try {
     const status = document.querySelector('#searchMessage')?.textContent || '';
     return /30331/.test(area) && /selected|ready/i.test(status);
   }, null, { timeout: 60_000 });
-  await sleep(4500);
+  await sleep(3500);
 
   // 4. Show alternate footprint styling.
   await page.locator('[data-style="outline"]').click();
@@ -128,7 +128,7 @@ try {
   await page.locator('#themeBtn').click();
   await sleep(1600);
   await page.locator('#focusBtn').click();
-  await sleep(3600);
+  await sleep(3000);
   await page.locator('#focusBtn').click();
   await sleep(1400);
 
@@ -150,7 +150,7 @@ try {
   const mp4 = path.join(demoDir, 'map-jinn-demo.mp4');
   await run('ffmpeg', [
     '-y', '-i', finalWebm,
-    '-c:v', 'libx264', '-preset', 'medium', '-crf', '22',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '18',
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
     '-an', mp4
   ]);

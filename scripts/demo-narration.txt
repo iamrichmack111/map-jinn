@@ -1,6 +1,6 @@
 Map Jinn turns real building footprints into clean, printable map artwork.
-The demo begins with the built-in account flow, then opens the live G.I.S. workspace.
-Search ZIP code three-oh-three-three-one, and Map Jinn moves into that footprint area instead of simply typing the query.
+Start with the built-in account flow, then open the live G.I.S. workspace.
+Search ZIP code three-oh-three-three-one, and Map Jinn moves directly into that footprint area.
 Switch between filled and outline footprint styles. Add a custom apparel label and live coordinates. Then preview the artwork in dark or paper mode.
 Focus mode gives the map more room on screen, making the design easier to inspect.
 When the layout is ready, export a print-ready P.N.G. directly from the rendered map.
