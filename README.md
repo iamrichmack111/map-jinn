@@ -28,7 +28,13 @@ chmod +x scripts/*.sh
 xdg-open local-demo/map-jinn-demo.mp4
 ```
 
-The one-time setup installs Piper locally and downloads `en_US-ryan-high`. Rendered media, the Piper model, and the Piper virtual environment are excluded from Git.
+The one-time setup installs Piper locally and downloads `en_US-hfc_male-medium`. Narration is synthesized sentence-by-sentence, then mastered with EQ, compression, and loudness normalization. Rendered media, the Piper model, and the Piper virtual environment are excluded from Git.
+
+To replace only the narration without re-recording the browser demo:
+```bash
+./scripts/remake-demo-voice.sh
+```
+You can also try the alternate natural male voice with `./scripts/remake-demo-voice.sh en_US-joe-medium`.
 
 If an older version of this repo tracked demo media, run once:
 ```bash
